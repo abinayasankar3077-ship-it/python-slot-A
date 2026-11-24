@@ -1,1 +1,27 @@
-
+START
+  |
+Read Department Files
+  |
+Check File Availability
+  |
+Read Each Line
+  |
+Validate Records
+  |
+Check Duplicate Register Number
+  |
+Validate E-mail
+  |
+  +---- Invalid ----> Write to Error Log
+  |
+Valid Registration
+  |
+Add to Master List
+  |
+Separate Participants by Events
+  |
+Generate Summary Report
+  |
+Save All Output Files
+  |
+STOP
