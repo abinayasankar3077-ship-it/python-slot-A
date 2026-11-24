@@ -1,1 +1,14 @@
+FUNCTION findDuplicates(arr, N):
+    CREATE empty hash set `seen`
+    CREATE empty list `duplicates`
+    SET `operations` = 0
+
+    FOR i = 0 TO N - 1:
+        INCREMENT `operations`
+        IF arr[i] IS IN `seen`:
+            ADD arr[i] TO `duplicates`
+        ELSE:
+            INSERT arr[i] INTO `seen`
+
+    RETURN `duplicates`, `operations`
 
