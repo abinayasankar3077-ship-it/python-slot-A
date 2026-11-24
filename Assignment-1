@@ -1,1 +1,61 @@
+# Constants
+BASE_FAT = 3.50
+MIN_SNF = 8.50
+SNF_PENALTY_PER_STEP = 0.30  # Example baseline penalty if SNF < 8.50
+
+BONUS_LITRE_THRESHOLD = 500.0
+BONUS_RATE_PER_LITRE = 0.50
+
+
+def get_rate_card(month: str) -> dict:
+  """Selects seasonal base rate and fat step rate."""
+  summer_months = {"april", "may", "june"}
+  if month.strip().lower() in summer_months:
+    return {"base_rate": 32.00, "fat_step_rate": 0.45}
+  return {"base_rate": 30.00, "fat_step_rate": 0.40}
+
+
+def calculate_litre_rate(fat: float, snf: float, month: str) -> float:
+  """Calculates rate per litre supporting two-decimal Fat and SNF readings."""
+  rates = get_rate_card(month)
+
+  # Each 0.1% is 1 step; two-decimal readings yield fractional steps (e.g., 7.4 steps)
+  fat_steps = (fat - BASE_FAT) * 10.0
+  rate = rates["base_rate"] + (fat_steps * rates["fat_step_rate"])
+
+  # Apply SNF deduction if below minimum standard
+  if snf < MIN_SNF:
+    snf_steps = (MIN_SNF - snf) * 10.0
+    rate -= snf_steps * SNF_PENALTY_PER_STEP
+
+  return round(rate, 2)
+
+
+def calculate_bonus(total_litres: float) -> float:
+  """Returns total bonus payout if 10-day volume strictly exceeds 500 litres."""
+  if total_litres > BONUS_LITRE_THRESHOLD:
+    return round(total_litres * BONUS_RATE_PER_LITRE, 2)
+  return 0.00
+
+
+def calculate_10_day_payout(pours: list[dict], month: str) -> dict:
+  """Computes total 10-day payment across all daily milk collections."""
+  total_litres = 0.0
+  base_payout = 0.0
+
+  for pour in pours:
+    litres = pour["litres"]
+    rate = calculate_litre_rate(pour["fat"], pour["snf"], month)
+    total_litres += litres
+    base_payout += litres * rate
+
+  bonus = calculate_bonus(total_litres)
+  final_payout = round(base_payout + bonus, 2)
+
+  return {
+      "total_litres": round(total_litres, 2),
+      "base_payout": round(base_payout, 2),
+      "bonus": bonus,
+      "final_payout": final_payout,
+  }
 
