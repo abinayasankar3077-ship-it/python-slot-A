@@ -1,1 +1,42 @@
+FUNCTION normalize_phone(raw_phone):
+    IF raw_phone is empty OR null:
+        RETURN null
+    digits = KEEP ONLY numeric characters ('0'-'9') from raw_phone
+    IF length(digits) >= 10:
+        RETURN last 10 characters of digits
+    RETURN digits
+
+FUNCTION normalize_name(raw_name):
+    IF raw_name is empty OR null:
+        RETURN ""
+    cleaned = TRIM whitespace from raw_name
+    cleaned = REPLACE multiple spaces with single space
+    RETURN TITLE_CASE(cleaned)
+
+FUNCTION merge_contacts(contact_lists):
+    merged_dict = EMPTY DICTIONARY
+
+    FOR EACH list IN contact_lists:
+        FOR EACH contact IN list:
+            norm_phone = normalize_phone(contact.phone)
+            IF norm_phone is null:
+                CONTINUE  // Skip or handle contacts without a phone number separately
+
+            norm_name = normalize_name(contact.name)
+            norm_email = LOWERCASE(TRIM(contact.email))
+
+            IF norm_phone NOT IN merged_dict:
+                merged_dict[norm_phone] = {
+                    "names": EMPTY SET,
+                    "numbers": EMPTY SET,
+                    "emails": EMPTY SET
+                }
+
+            IF norm_name is not empty:
+                ADD norm_name TO merged_dict[norm_phone]["names"]
+            ADD norm_phone TO merged_dict[norm_phone]["numbers"]
+            IF norm_email is not empty:
+                ADD norm_email TO merged_dict[norm_phone]["emails"]
+
+    RETURN VALUES(merged_dict)
 
